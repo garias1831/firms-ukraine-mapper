@@ -1,7 +1,9 @@
-from cmu_graphics import *
+from ui.ui import *
 
 def main():
-    pass
+    start()
 
-main()
+if __name__ == '__main__':
+    main()
+
 
