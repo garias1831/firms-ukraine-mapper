@@ -1,7 +1,7 @@
-from ui.ui import *
+from ui.ui import * #Import star bad, but need it to make it work w/ cmu graphics
 
 def main():
-    start()
+    run_ui()
 
 if __name__ == '__main__':
     main()
