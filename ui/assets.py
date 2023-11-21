@@ -8,3 +8,7 @@ class VisualConfig:
     def __init__(self, _bgcolor):
         self.bgcolor = _bgcolor
 
+
+class AppScreen:
+    def __init__(self, _border):
+        self.border = _border
