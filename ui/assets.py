@@ -1,4 +1,5 @@
 from cmu_graphics import *
+import pandas as pd
 
 class VisualConfig:
     '''Global configuration for app visual state. Includes data such as primary/secondary colors.
@@ -14,15 +15,14 @@ class VisualConfig:
         self.appheight = appheight
         self.bgcolor = bgcolor
 
-        self.btn_panel_width = 7*appwidth/24
+        self.btn_panel_width = 7.5*appwidth/24
 
     def set_appsize(self, width, height):
         '''Sets app size if changed'''
         self.appwidth = width
         self.appheight = height
 
-        self.btn_panel_width = 7.5*width/24
-        
+        self.btn_panel_width = 7.5*width/24        
 
 class AppScreen:
     '''Defines the map display where FIRMS data will be mapped.'''
@@ -32,13 +32,54 @@ class AppScreen:
         
         self.img_path = r'C:\code\python\firms-ukraine-mapper\ui\images\ukraine.png' #TODO -- make this not absolute (and all the paths tbhs!)
 
-    def draw_app_screen(self):
+    def draw_app_screen(self): #TODO -- all thest 'draw thing' methods need some fixing .. specifically, they should probably take in location params form outside, rather then hardcoding them in the class
         appwidth = self.config.appwidth
         appheight = self.config.appheight
 
         drawRect(7.5*appwidth/24, 0, 7.5*appwidth/12, appheight, fill=rgb(*self.border))
         drawImage(self.img_path, 8*appwidth/24, 2*appheight/15, width=7*appwidth/12, height=11*appheight/15, #Looks aight, but not totes epic. Also looks bad when resized souper small
               border=rgb(*self.border), borderWidth=3)
+        
+    def draw_firms(self, firms:pd.DataFrame):
+        '''Plots firms data'''
+        appwidth = self.config.appwidth
+        appheight = self.config.appheight
+
+        #Lattitude and longitude values of Ukraine borders
+        # lat_top = 52.4214
+        # lat_btm = 44.376
+        # long_left = 22.2014
+        # long_right = 40.2182
+
+        lat_top = 52.8583 
+        lat_btm = 43.776
+        long_left = 21.3046
+        long_right = 40.8805 
+
+        #print(firms)
+
+        latitude_vals = firms['latitude']
+        longitude_vals = firms['longitude']
+        
+        print(firms.index)
+        for idx in firms.index:
+            print(idx)
+            print(latitude_vals)
+            latitude = latitude_vals.loc[idx]
+            longitude = longitude_vals.loc[idx]
+
+            delta_x = (longitude - long_left) / (long_right - long_left) #How far across a given data point is as a percentage of the screen width.
+            delta_y = (latitude - lat_btm) / (lat_top - lat_btm)
+
+            screen_left = 8*appwidth/24
+            screen_top = 2*appheight/15
+            screen_width = 7*appwidth/12
+            screen_height = 11*appheight/15
+
+            #print(latitude, longitude)
+            #Latitude longitude goes up-down (like an x-y canvas), but graphics canvas goes up-down, hence the expression for the y-coord 
+            drawRect(screen_left + float(delta_x*screen_width), screen_top + (screen_height - float(delta_y*screen_height)),
+                     6, 6, fill='red', align='center')
         
     def get_min_dimensions(self):
         '''Gets the minimum possible dimensions that the screen can be resized.'''

@@ -2,4 +2,5 @@
 venv
 
 #Testing
+tests.py
 #TODO put unit tests here
