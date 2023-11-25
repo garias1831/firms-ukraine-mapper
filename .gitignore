@@ -3,4 +3,8 @@ venv
 
 #Testing
 tests.py
-#TODO put unit tests here
+.pytest_cache
+pytest.ini
+
+#misc
+__pycache__

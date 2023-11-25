@@ -25,12 +25,15 @@ class VisualConfig:
         self.btn_panel_width = 7.5*width/24        
 
 class AppScreen:
-    '''Defines the map display where FIRMS data will be mapped.'''
+    '''Defines the map display where FIRMS data will be mapped.
+    Attributes:
+        firms: pd.Dataframe of all the current firms to be drawn.'''
     def __init__(self, config, border):
         self.config = config
         self.border = border
         
         self.img_path = r'C:\code\python\firms-ukraine-mapper\ui\images\ukraine.png' #TODO -- make this not absolute (and all the paths tbhs!)
+        self.firms = None
 
     def draw_app_screen(self): #TODO -- all thest 'draw thing' methods need some fixing .. specifically, they should probably take in location params form outside, rather then hardcoding them in the class
         appwidth = self.config.appwidth
@@ -40,8 +43,12 @@ class AppScreen:
         drawImage(self.img_path, 8*appwidth/24, 2*appheight/15, width=7*appwidth/12, height=11*appheight/15, #Looks aight, but not totes epic. Also looks bad when resized souper small
               border=rgb(*self.border), borderWidth=3)
         
-    def draw_firms(self, firms:pd.DataFrame):
+    def draw_firms(self):
         '''Plots firms data'''
+
+        if self.firms is None:
+            return
+
         appwidth = self.config.appwidth
         appheight = self.config.appheight
 
@@ -56,15 +63,13 @@ class AppScreen:
         long_left = 21.3046
         long_right = 40.8805 
 
-        #print(firms)
-
-        latitude_vals = firms['latitude']
-        longitude_vals = firms['longitude']
+        latitude_vals = self.firms['latitude']
+        longitude_vals = self.firms['longitude']
         
-        print(firms.index)
-        for idx in firms.index:
-            print(idx)
-            print(latitude_vals)
+        #print(firms.index)
+        for idx in self.firms.index:
+            #print(idx)
+            #print(latitude_vals)
             latitude = latitude_vals.loc[idx]
             longitude = longitude_vals.loc[idx]
 
