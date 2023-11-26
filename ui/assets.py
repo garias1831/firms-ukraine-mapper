@@ -2,7 +2,7 @@ from cmu_graphics import *
 import pandas as pd
 import datetime
 
-class VisualConfig:
+class VisualConfig: #TODO -- gernerally, the code for this lowkey sucks, and a lot of it is kinda hardcoded, but for now is good, make it better later tho
     '''Global configuration for app visual state. Includes data such as primary/secondary colors.
     Attributes:
         bgcolor, tuple<int>:
@@ -33,7 +33,7 @@ class AppScreen:
         self.config = config
         self.border = border
         
-        self.img_path = r'C:\code\python\firms-ukraine-mapper\ui\images\ukraine.png' #TODO -- make this not absolute (and all the paths tbhs!)
+        self.img_path = r'C:\code\python\firms-ukraine-mapper\ui\images\ukraine.png' #FIXME -- make this not absolute (and all the paths tbhs!)
         self.firms = None
 
     def draw_app_screen(self): #TODO -- all thest 'draw thing' methods need some fixing .. specifically, they should probably take in location params form outside, rather then hardcoding them in the class
@@ -167,7 +167,7 @@ class Timeline: #might be a better name for this?
         appheight = self.config.appheight
         
         #Times the timeline width
-        drawRect(self.slider_min + self.timelapse_progress*38*appwidth/40, 63.5*appheight/72 , 
+        drawRect(self.slider_min + (self.timelapse_progress)*(38*appwidth/40 - 0.5*appwidth/40), 63.5*appheight/72 , 
                  0.5*appwidth/40, 8*appheight/72, fill=rgb(*self.slider_color))
 
     
