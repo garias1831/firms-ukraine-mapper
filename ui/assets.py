@@ -1,5 +1,6 @@
 from cmu_graphics import *
 import pandas as pd
+import datetime
 
 class VisualConfig:
     '''Global configuration for app visual state. Includes data such as primary/secondary colors.
@@ -144,7 +145,32 @@ class TimelaspeBackBtn:
 
 
 class Timeline: #might be a better name for this?
-    pass
+    def __init__(self, config, color, slider_color) -> None:
+        self.config = config
+        self.color = color
+        self.slider_color = slider_color
+
+        self.slider_min = self.config.appwidth/40
+        self.timelapse_progress = 0 #The day the timelapse is currently on as a percentage of all the dates in the timmelapse
+
+    def set_size(self): #TODO -- not drawing at the correct spot, prob bc of this method, but whatever
+        self.slider_min = self.config.appwidth/40 #Reset with new appwidth val (called from update_app_size in ui.py)
+
+    def draw_timeline(self):
+        appwidth = self.config.appwidth
+        appheight = self.config.appheight
+
+        drawRect(appwidth/40, 65*appheight/72, 38*appwidth/40, 5*appheight/72, fill=rgb(*self.color))
+
+    def draw_slider(self):
+        appwidth = self.config.appwidth
+        appheight = self.config.appheight
+        
+        #Times the timeline width
+        drawRect(self.slider_min + self.timelapse_progress*38*appwidth/40, 63.5*appheight/72 , 
+                 0.5*appwidth/40, 8*appheight/72, fill=rgb(*self.slider_color))
+
+    
 
 
 class AxisTabHeader:
