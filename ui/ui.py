@@ -48,11 +48,21 @@ def update_app_size(app):
 def update_screen(app, dt:int):
     '''Adds new firms onto the appscreen.'''
     app.screen.firms = app.datamanager.get_firms_from_date(app.timelapse_date)
-    app.timelapse_date = app.timelapse_date + dt*datetime.timedelta(days=1) #TODO -- need to put upper / lower bounds on this ,so that the timeline doesn't run forever
+    app.timelapse_date += dt*datetime.timedelta(days=1) 
 
 def update_timeline_slider(app, dt:int):
     timelapse_progress = app.datamanager.get_timelapse_progress(app.timelapse_date)
     app.timeline.timelapse_progress = timelapse_progress
+
+    appwidth = app.config.appwidth
+    print(appwidth/40 + (timelapse_progress)*(38*appwidth/40 - 0.5*appwidth/40))
+
+def onMousePress(app, mouseX, mouseY):
+    pass
+
+
+def onMouseDrag(app, mouseX, mouseY):
+    print(mouseX, mouseY)
 
 def onKeyPress(app, key): #TODO -- using keys for testing purposes. .. in reality, buttons should control the logic flow
     if key == 'p': #Testing purposes

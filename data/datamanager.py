@@ -1,10 +1,12 @@
-import pandas as pd
+from config.definitions import ROOT_DIR
 import datetime
+import pandas as pd
+import os
 
 class DataManager:
     '''Manages the firms data to be used throughout the application.'''
-    def __init__(self):
-        df =  pd.read_csv(r'C:\code\python\firms-ukraine-mapper\data\firms\fire_nrt_J1V-C2_404869_new.csv')
+    def __init__(self): 
+        df = pd.read_csv(os.path.join(ROOT_DIR, r'data\firms', 'firms.csv'))
         self.firms = df.drop(['scan', 'track', 'acq_time', 'satellite', 'instrument', 
                          'confidence', 'version', 'frp', 'daynight'], axis=1)
     

@@ -1,6 +1,7 @@
 from cmu_graphics import *
+import os
+from config.definitions import ROOT_DIR
 import pandas as pd
-import datetime
 
 class VisualConfig: #TODO -- gernerally, the code for this lowkey sucks, and a lot of it is kinda hardcoded, but for now is good, make it better later tho
     '''Global configuration for app visual state. Includes data such as primary/secondary colors.
@@ -33,7 +34,8 @@ class AppScreen:
         self.config = config
         self.border = border
         
-        self.img_path = r'C:\code\python\firms-ukraine-mapper\ui\images\ukraine.png' #FIXME -- make this not absolute (and all the paths tbhs!)
+        #self.img_path = r'C:\code\python\firms-ukraine-mapper\ui\images\ukraine.png' #FIXME -- make this not absolute (and all the paths tbhs!)
+        self.img_path = os.path.join(ROOT_DIR, r'ui\images', 'ukraine.png')
         self.firms = None
 
     def draw_app_screen(self): #TODO -- all thest 'draw thing' methods need some fixing .. specifically, they should probably take in location params form outside, rather then hardcoding them in the class
@@ -96,8 +98,8 @@ class TimelapseBtn:
     '''Toggles whether or not the timelapse is running or paused.'''
     def __init__(self, config):
         self.config = config
-        #self.timelapse_running = False #TODO -- not sure if timelapse should start running or paused -- will change img to fit .. also sidenote, not sure if should create new dir for buttons images and stuff?
-        self.img_path = r'C:\code\python\firms-ukraine-mapper\ui\images\playbtn.png' #TODO - gonna be one of these two
+       
+        self.img_path = os.path.join(ROOT_DIR, r'ui\images', 'playbtn.png')  #TODO - gonna be one of these two
         #self.img_path = r'C:\code\python\firms-ukraine-mapper\ui\images\pausebtn.png'   
                 
     def draw_timelapse_btn(self):
@@ -114,7 +116,7 @@ class TimelapseBtn:
 class TimelapseForwardBtn:
     def __init__(self, config):
         self.config = config
-        self.img_path = r'C:\code\python\firms-ukraine-mapper\ui\images\forwardbtn.png'
+        self.img_path =  self.img_path = os.path.join(ROOT_DIR, r'ui\images', 'forwardbtn.png')
 
     def draw_forward_btn(self):
         appwidth = self.config.appwidth
@@ -130,7 +132,7 @@ class TimelapseForwardBtn:
 class TimelaspeBackBtn:
     def __init__(self, config):
         self.config = config
-        self.img_path = r'C:\code\python\firms-ukraine-mapper\ui\images\backwardsbtn.png'
+        self.img_path = os.path.join(ROOT_DIR, r'ui\images', 'backwardsbtn.png')
 
     def draw_back_btn(self):
         appwidth = self.config.appwidth
@@ -150,7 +152,7 @@ class Timeline: #might be a better name for this?
         self.color = color
         self.slider_color = slider_color
 
-        self.slider_min = self.config.appwidth/40
+        self.slider_min = self.config.appwidth/40 #TODO -- need to place upper and lower bounds on the timeline dates
         self.timelapse_progress = 0 #The day the timelapse is currently on as a percentage of all the dates in the timmelapse
 
     def set_size(self): #TODO -- not drawing at the correct spot, prob bc of this method, but whatever
@@ -170,13 +172,11 @@ class Timeline: #might be a better name for this?
         drawRect(self.slider_min + (self.timelapse_progress)*(38*appwidth/40 - 0.5*appwidth/40), 63.5*appheight/72 , 
                  0.5*appwidth/40, 8*appheight/72, fill=rgb(*self.slider_color))
 
-    
-
 
 class AxisTabHeader:
     def __init__(self, config, color):
         self.config = config
-        self.img_url = r'C:\code\python\firms-ukraine-mapper\ui\images\axisheader.png'
+        self.img_url =  self.img_path = os.path.join(ROOT_DIR, r'ui\images', 'playbtn.png')
         self.underline = color
 
     def draw_axis_header(self):
