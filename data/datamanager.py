@@ -9,7 +9,7 @@ class DataManager:
         df = pd.read_csv(os.path.join(ROOT_DIR, r'data\firms', 'firms.csv'))
         self.firms = df.drop(['scan', 'track', 'acq_time', 'satellite', 'instrument', 
                          'confidence', 'version', 'frp', 'daynight'], axis=1)
-    
+            
     def str_to_date(self, date_str):
         '''Converts string date (YYYY-MM-DD) representation to datetime object'''
         yr, month, day = date_str.split('-')

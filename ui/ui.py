@@ -14,9 +14,10 @@ def redrawAll(app):
     app.timelapse_btn.draw_timelapse_btn()
     app.timelapse_forward_btn.draw_forward_btn()
     app.timelapse_back_btn.draw_back_btn()
-    app.axis_btn_header.draw_axis_header()
+    #app.axis_btn_header.draw_axis_header()
     app.timeline.draw_timeline()
     app.timeline.draw_slider()
+    app.graph.draw_background()
 
     #TODO -- test ... all data from feb 24 2023 - march 2 2023
     
@@ -55,7 +56,7 @@ def update_timeline_slider(app, dt:int):
     app.timeline.timelapse_progress = timelapse_progress
 
     appwidth = app.config.appwidth
-    print(appwidth/40 + (timelapse_progress)*(38*appwidth/40 - 0.5*appwidth/40))
+    print(appwidth/40 + (timelapse_progress)*(38*appwidth/40 - 0.5*appwidth/40)) #THe progress
 
 def onMousePress(app, mouseX, mouseY):
     pass
@@ -85,8 +86,10 @@ def load_ui_elements(app):
     app.timelapse_btn = ui.assets.TimelapseBtn(app.config)
     app.timelapse_forward_btn = ui.assets.TimelapseForwardBtn(app.config)
     app.timelapse_back_btn = ui.assets.TimelaspeBackBtn(app.config)
-    app.axis_btn_header = ui.assets.AxisTabHeader(app.config, color=(250, 243, 243))
+    #app.axis_btn_header = ui.assets.AxisTabHeader(app.config, color=(250, 243, 243))
     app.timeline = ui.assets.Timeline(app.config, color=(129, 134, 156), slider_color=(250, 243, 243))
+    app.graph = ui.assets.Graph(app.config, bgcolor=(46, 53, 83), axiscolor=(250, 243, 243),
+                                barcolor=(224, 102, 102), selected_barcolor=(234, 153, 153))
 
 def load_data_attributes(app, datamanager):
     '''Loads data related to the application state.'''

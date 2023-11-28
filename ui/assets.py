@@ -107,7 +107,7 @@ class TimelapseBtn:
         appheight = self.config.appheight
         panel_width = self.config.btn_panel_width
 
-        x, y = 40*panel_width/100, 5*appheight/15 
+        x, y = 40*panel_width/100, 11*appheight/15 
         width, height = 20*panel_width/100, appheight/8
     
         drawImage(self.img_path, x, y, width=width, height=height) #TODO -- temp coords
@@ -124,7 +124,7 @@ class TimelapseForwardBtn:
         panel_width = self.config.btn_panel_width
 
         width, height = 33*panel_width/100, appheight/10
-        x, y = 62*panel_width/100, 5*appheight/15 + (1/10) * height
+        x, y = 62*panel_width/100, 11*appheight/15 + (1/10) * height
 
         drawImage(self.img_path, x, y, width=width, height=height)
 
@@ -141,7 +141,7 @@ class TimelaspeBackBtn:
 
         
         width, height = 33*panel_width/100, appheight/10
-        x, y = 5*panel_width/100, 5*appheight/15 + (1/10) * height
+        x, y = 5*panel_width/100, 11*appheight/15 + (1/10) * height
 
         drawImage(self.img_path, x, y, width=width, height=height)
 
@@ -173,10 +173,10 @@ class Timeline: #might be a better name for this?
                  0.5*appwidth/40, 8*appheight/72, fill=rgb(*self.slider_color))
 
 
-class AxisTabHeader:
+class AxisTabHeader: #TODO -- class might be not necceasry
     def __init__(self, config, color):
         self.config = config
-        self.img_url =  self.img_path = os.path.join(ROOT_DIR, r'ui\images', 'playbtn.png')
+        self.img_url =  self.img_path = os.path.join(ROOT_DIR, r'ui\images', 'axisheader.png')
         self.underline = color
 
     def draw_axis_header(self):
@@ -190,3 +190,25 @@ class AxisTabHeader:
 
         under_x, under_y = 5*panel_width/100, text_y + text_height 
         drawRect(under_x, under_y, 85*panel_width/100, appheight/100, fill=rgb(*self.underline))
+
+
+class Graph:
+    def __init__(self, config, bgcolor, axiscolor, barcolor, selected_barcolor) -> None:
+        self.config = config
+        self.bg = bgcolor
+        self.axis = axiscolor
+        self.barcolor = barcolor
+        self.selected_barcolor = selected_barcolor
+
+    def draw_background(self):
+        appwidth = self.config.appwidth
+        appheight = self.config.appheight
+        panel_width = self.config.btn_panel_width
+
+        width, height = 90*panel_width/100, 67*appheight/100
+        x, y = 5*panel_width/100, 3*appheight/100
+        drawRect(x, y, width, height, fill=rgb(*self.bg))
+
+        underline_x, underline_y = x - 2*panel_width/100, y + height
+        underline_width, underline_height = width + 4*panel_width/100, 1*appheight/100
+        drawRect(underline_x, underline_y, underline_width , underline_height, fill=rgb(*self.axis))
