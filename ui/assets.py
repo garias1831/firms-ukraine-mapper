@@ -1,4 +1,5 @@
 from cmu_graphics import *
+import datetime
 import os
 from config.definitions import ROOT_DIR
 import pandas as pd
@@ -36,7 +37,7 @@ class AppScreen:
         
         #self.img_path = r'C:\code\python\firms-ukraine-mapper\ui\images\ukraine.png' #FIXME -- make this not absolute (and all the paths tbhs!)
         self.img_path = os.path.join(ROOT_DIR, r'ui\images', 'ukraine.png')
-        self.firms = None
+        self.firms = None #FIXME -- would probably be nicer just to pass in data from datamanager in to this, rather than modifying this attribute (which is a lot less readable!)
 
     def draw_app_screen(self): #TODO -- all thest 'draw thing' methods need some fixing .. specifically, they should probably take in location params form outside, rather then hardcoding them in the class
         appwidth = self.config.appwidth
@@ -193,12 +194,17 @@ class AxisTabHeader: #TODO -- class might be not necceasry
 
 
 class Graph:
-    def __init__(self, config, bgcolor, axiscolor, barcolor, selected_barcolor) -> None:
+    '''Bar graph showing the number of FIRMS events over a given time.'''
+    def __init__(self, config, firms_counts:dict, bgcolor, axiscolor, barcolor, selected_barcolor,) -> None:
         self.config = config
         self.bg = bgcolor
         self.axis = axiscolor
         self.barcolor = barcolor
         self.selected_barcolor = selected_barcolor
+
+        self.bars_per_month = 1 #How many bars will show on the graph, can be scaled by the user (from 1 to maybe like 4?)
+
+        self.firms_counts = firms_counts #Will be set from ui.ui
 
     def draw_background(self):
         appwidth = self.config.appwidth
@@ -212,3 +218,29 @@ class Graph:
         underline_x, underline_y = x - 2*panel_width/100, y + height
         underline_width, underline_height = width + 4*panel_width/100, 1*appheight/100
         drawRect(underline_x, underline_y, underline_width , underline_height, fill=rgb(*self.axis))
+
+
+    def draw_bars(self, timelapse_month_yr:datetime.date): #TODO -- a dict or series might work here
+        '''Draws bars on the graph corresponding to the number of firms events per month.'''
+        appwidth = self.config.appwidth
+        appheight = self.config.appheight
+        panel_width = self.config.btn_panel_width
+
+        graph_height = 67*appheight/100
+        graph_width = 90*panel_width/100
+        graph_left = 5*panel_width/100
+        graph_bottom = 70*appheight/100
+
+        total_bars = len(self.firms_counts)
+        largest_count = max(self.firms_counts.values()) #Scaling other bars to the max of the largest bar
+        for dx, date in enumerate(self.firms_counts):
+            
+            #If the timelapse date is the same as the date for this bar, change the color
+            color = self.selected_barcolor if date == timelapse_month_yr else self.barcolor
+
+            count = int(self.firms_counts[date]) #cast to int b/c stored as numpy val
+            x, y = graph_left + dx*graph_width/total_bars + 0.5*graph_width/100, graph_bottom
+            width = graph_width/total_bars - graph_width/100
+            height = float(count*graph_height/largest_count) - 0.5*graph_height/100
+
+            drawRect(x, y, width, height, fill=rgb(*color), align='left-bottom')

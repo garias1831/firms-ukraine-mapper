@@ -19,6 +19,10 @@ def redrawAll(app):
     app.timeline.draw_slider()
     app.graph.draw_background()
 
+    timelapse_month_yr = datetime.date(year=app.timelapse_date.year, month=app.timelapse_date.month, day=1)
+    app.graph.draw_bars(timelapse_month_yr)
+    
+
     #TODO -- test ... all data from feb 24 2023 - march 2 2023
     
     app.screen.draw_firms() #THis is slow when drawing a ton ton, but works for most purposess
@@ -61,6 +65,8 @@ def update_timeline_slider(app, dt:int):
 def onMousePress(app, mouseX, mouseY):
     pass
 
+def onMouseMove(app, mouseX, mouseY):
+    pass
 
 def onMouseDrag(app, mouseX, mouseY):
     print(mouseX, mouseY)
@@ -77,6 +83,9 @@ def onKeyPress(app, key): #TODO -- using keys for testing purposes. .. in realit
         print('timelapse forwards')
         app.timelapse_forward = True
 
+    if key == 's':
+        print('Scale graph axes')
+
 #==============App configuration methods========================================================
 
 def load_ui_elements(app):
@@ -88,8 +97,11 @@ def load_ui_elements(app):
     app.timelapse_back_btn = ui.assets.TimelaspeBackBtn(app.config)
     #app.axis_btn_header = ui.assets.AxisTabHeader(app.config, color=(250, 243, 243))
     app.timeline = ui.assets.Timeline(app.config, color=(129, 134, 156), slider_color=(250, 243, 243))
-    app.graph = ui.assets.Graph(app.config, bgcolor=(46, 53, 83), axiscolor=(250, 243, 243),
+
+    counts = app.datamanager.get_firms_per_months(1) #FIXME -- 1 is a placeholder val heree
+    app.graph = ui.assets.Graph(app.config, counts, bgcolor=(46, 53, 83), axiscolor=(250, 243, 243),
                                 barcolor=(224, 102, 102), selected_barcolor=(234, 153, 153))
+    
 
 def load_data_attributes(app, datamanager):
     '''Loads data related to the application state.'''
@@ -102,8 +114,8 @@ def load_data_attributes(app, datamanager):
 def run_ui(datamanager): 
     app.width = 1536 #FIXME Need this for timeline scaling purposes
     app.height = 793
-    load_ui_elements(app)
     load_data_attributes(app, datamanager)
+    load_ui_elements(app)
     runApp()
     
     

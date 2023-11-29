@@ -8,3 +8,4 @@ pytest.ini
 
 #misc
 __pycache__
+scrap.py
