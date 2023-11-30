@@ -21,6 +21,8 @@ def redrawAll(app):
 
     timelapse_month_yr = datetime.date(year=app.timelapse_date.year, month=app.timelapse_date.month, day=1)
     app.graph.draw_bars(timelapse_month_yr)
+
+    app.graph.draw_info_if_hovering(app.bar_showing_info)
     
 
     #TODO -- test ... all data from feb 24 2023 - march 2 2023
@@ -60,13 +62,21 @@ def update_timeline_slider(app, dt:int):
     app.timeline.timelapse_progress = timelapse_progress
 
     appwidth = app.config.appwidth
-    print(appwidth/40 + (timelapse_progress)*(38*appwidth/40 - 0.5*appwidth/40)) #THe progress
 
 def onMousePress(app, mouseX, mouseY):
     pass
 
 def onMouseMove(app, mouseX, mouseY):
-    pass
+    check_bar_hovering(mouseX, mouseY)
+
+def check_bar_hovering(mouseX, mouseY):
+    for idx, bar in enumerate(app.graph.bars):
+        if bar.mouse_over_bar(mouseX, mouseY):
+            app.bar_showing_info = idx
+            return
+    
+    app.bar_showing_info = None
+
 
 def onMouseDrag(app, mouseX, mouseY):
     print(mouseX, mouseY)
@@ -118,6 +128,8 @@ def load_data_attributes(app, datamanager):
     
     app.timelapse_started = False
     app.timelapse_forward = True #Timelapse can either run forwards or backwards
+
+    app.bar_showing_info = None #The current bar on the graph displaying its info panel when 
 
 
 def run_ui(datamanager): 

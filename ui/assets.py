@@ -192,6 +192,29 @@ class AxisTabHeader: #TODO -- class might be not necceasry
         under_x, under_y = 5*panel_width/100, text_y + text_height 
         drawRect(under_x, under_y, 85*panel_width/100, appheight/100, fill=rgb(*self.underline))
 
+class GraphBar:
+    '''Defines an individual bar that will appear in the app graph.'''
+    def __init__(self, left, bottom, width, height) -> None:
+        self.left = left
+        self.bottom = bottom
+        self.width = width
+        self.height = height
+
+    def draw_bar(self): #Might implement
+        pass
+
+    def mouse_over_bar(self, mouseX, mouseY):  #FIXME -- this method is a little jank
+        if ((self.left <= mouseX and mouseX <= self.left + self.width) and
+            self.bottom - self.height <= mouseY and mouseY <= self.bottom):
+            
+            #Dict is ordered, so get the date associated with this bar, and return it
+            #date = self.firms_counts.keys()[x] 
+            return True
+        return False
+    
+    def draw_bar_info(self):
+        print('drawin:')
+
 
 class Graph:
     '''Bar graph showing the number of FIRMS events over a given time.
@@ -205,6 +228,7 @@ class Graph:
         self.barcolor = barcolor
         self.selected_barcolor = selected_barcolor
 
+        self.bars = []  #List of graphbar objects
         self._bars_per_month = 1
         self.firms_counts = firms_counts #Will be set from ui.ui
     @property
@@ -216,9 +240,6 @@ class Graph:
         if 1 <= _bars_per_month and _bars_per_month <= 4:
             self._bars_per_month =  _bars_per_month
        
-        
-        
-
     def draw_background(self):
         appwidth = self.config.appwidth
         appheight = self.config.appheight
@@ -231,7 +252,6 @@ class Graph:
         underline_x, underline_y = x - 2*panel_width/100, y + height
         underline_width, underline_height = width + 4*panel_width/100, 1*appheight/100
         drawRect(underline_x, underline_y, underline_width , underline_height, fill=rgb(*self.axis))
-
 
     def draw_bars(self, timelapse_month_yr:datetime.date): #TODO -- a dict or series might work here
         '''Draws bars on the graph corresponding to the number of firms events per month.'''
@@ -246,6 +266,8 @@ class Graph:
 
         total_bars = len(self.firms_counts)
         largest_count = max(self.firms_counts.values()) #Scaling other bars to the max of the largest bar
+
+        current_bars = []
         for dx, date in enumerate(self.firms_counts):
             
             #If the timelapse date is the same as the date for this bar, change the color
@@ -262,4 +284,47 @@ class Graph:
             width = graph_width/total_bars - graph_width/100
             height = float(count*graph_height/largest_count) - 0.5*graph_height/100
 
+            #Add the bar to the list of bars
+            bar = GraphBar(x, y, width, height)
+            current_bars.append(bar)
+
             drawRect(x, y, width, height, fill=rgb(*color), align='left-bottom')
+        self.bars = current_bars
+
+    def draw_trendline(self): 
+        pass
+
+    def draw_info_if_hovering(self, bar_idx:int or None): 
+        '''Draws a little text box displaying the date associated with the bar and how many firms events occured on that date.'''
+        if bar_idx == None or bar_idx > len(self.firms_counts): #Need to add this second case if the user tries scaling the bars while hovering over a bar
+            return
+        
+        #Date range associated with the bar
+        date_range = list(self.firms_counts.keys())[bar_idx]
+        count = self.firms_counts[date_range]
+
+        def date_to_str(date:datetime.date):
+            year, month, day = date.year, date.month, date.day
+            return f'{year}-{month}-{day}'
+        
+        startdate = date_to_str(date_range[0])
+        enddate = date_to_str(date_range[1])
+
+        text = f'FIRMS events from {startdate} to {enddate}: {count}'
+        
+        #Draw the label:==========================
+
+        appwidth = self.config.appwidth
+        appheight = self.config.appheight
+        panel_width =  self.config.btn_panel_width
+
+        graph_left = 5*panel_width/100
+        graph_top = 3*appheight/100
+        graph_width = 90*panel_width/100
+
+        drawLabel(text, graph_left + graph_width/2, graph_top + 2*appheight/100,
+                  size=18, font='montserrat', fill='white') #FIXME Font not working, but whatever ig
+        
+    
+
+
