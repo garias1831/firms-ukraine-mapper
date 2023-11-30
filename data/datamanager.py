@@ -53,24 +53,38 @@ class DataManager:
 
         count_per_months = dict()
 
-        for curr_date in months: 
-            month, year = curr_date.month, curr_date.year #Current month and year
-            #dt = datetime.timedelta(days=30*x) #Months should be around here, and we only rly care about dates
-
-            #We only care about month and year in this case
-            if month == 12:
-                next_month = datetime.date(year=year+1, month=1, day=1) #First of the next month
+        for x in range(0, len(months), months_per):
+            
+            if x == 0: #We don't have data for all of feb 2022, so make sure it shows as the date of invasion day 1
+                curr_date = datetime.date(year=2022, month=2, day=24)            
             else:
-                next_month = datetime.date(year=year, month=month+1, day=1)
+                curr_date = months[x]
+
+            month, year = curr_date.month, curr_date.year #Current month and year
+            
+            if month + months_per > 12:
+                month = (month + months_per) - 12
+                next_month = datetime.date(year=year+1, month=month, day=1) #First of the next month
+            else:
+                month += months_per
+                next_month = datetime.date(year=year, month=month, day=1)
             
             firms_month_count = self.firms['acq_date'].loc[(curr_date <= self.firms['acq_date']) & 
-                                                           (self.firms['acq_date'] < next_month)].count()
+                                                           (self.firms['acq_date'] < next_month)].count() 
+
+            end = len(months) - 1
+            if end - months_per < x: #Make sure we don't overshoot with the step
+                last_date = dates.iloc[-1] #Get the very last day with firms data (as we might only have partial FIRMS for a month)
+                next_month = datetime.date(year=last_date.year, month=last_date.month, day=last_date.day)
+                month_range = (curr_date, next_month)
+            else:
+                month_range = (curr_date, next_month - datetime.timedelta(days=1)) #Subtract one to make it more clear that we're only scraping the month
 
             if curr_date not in count_per_months:
-                count_per_months[curr_date] = firms_month_count
+                count_per_months[month_range] = firms_month_count
             else:
-                count_per_months[curr_date] += firms_month_count
-        
+                count_per_months[month_range] += firms_month_count
+
         return count_per_months
 
 

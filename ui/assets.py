@@ -194,7 +194,10 @@ class AxisTabHeader: #TODO -- class might be not necceasry
 
 
 class Graph:
-    '''Bar graph showing the number of FIRMS events over a given time.'''
+    '''Bar graph showing the number of FIRMS events over a given time.
+    Attributes:
+        firms_counts: dict{(datetime.date, datetime.date): int}. Has keys of datetime.date objects representing the given date range
+        in which FIRMS data was collected during the timelapse. Values represent the numebr of firms events corresponding to a given range.'''
     def __init__(self, config, firms_counts:dict, bgcolor, axiscolor, barcolor, selected_barcolor,) -> None:
         self.config = config
         self.bg = bgcolor
@@ -202,9 +205,19 @@ class Graph:
         self.barcolor = barcolor
         self.selected_barcolor = selected_barcolor
 
-        self.bars_per_month = 1 #How many bars will show on the graph, can be scaled by the user (from 1 to maybe like 4?)
-
+        self._bars_per_month = 1
         self.firms_counts = firms_counts #Will be set from ui.ui
+    @property
+    def bars_per_month(self):
+        return self._bars_per_month
+
+    @bars_per_month.setter
+    def bars_per_month(self, _bars_per_month:int):
+        if 1 <= _bars_per_month and _bars_per_month <= 4:
+            self._bars_per_month =  _bars_per_month
+       
+        
+        
 
     def draw_background(self):
         appwidth = self.config.appwidth
@@ -236,7 +249,13 @@ class Graph:
         for dx, date in enumerate(self.firms_counts):
             
             #If the timelapse date is the same as the date for this bar, change the color
-            color = self.selected_barcolor if date == timelapse_month_yr else self.barcolor
+
+            start_date = date[0]
+            end_date = date[1]
+            if start_date <= timelapse_month_yr and timelapse_month_yr <= end_date:
+                color = self.selected_barcolor
+            else:
+                color = self.barcolor
 
             count = int(self.firms_counts[date]) #cast to int b/c stored as numpy val
             x, y = graph_left + dx*graph_width/total_bars + 0.5*graph_width/100, graph_bottom

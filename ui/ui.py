@@ -83,8 +83,16 @@ def onKeyPress(app, key): #TODO -- using keys for testing purposes. .. in realit
         print('timelapse forwards')
         app.timelapse_forward = True
 
-    if key == 's':
-        print('Scale graph axes')
+    if key == 'n': #FIXME Might keep some key presses for scaling the graph, espesh if i cant find space for some btns
+        print('Scale graph up')
+        app.graph.bars_per_month += 1
+        counts = app.datamanager.get_firms_per_months(app.graph.bars_per_month) #FIXME -- dis a lil laggy, but is okay
+        app.graph.firms_counts = counts
+    if key == 'm':
+        print('Scale graph down!')
+        app.graph.bars_per_month -= 1
+        counts = app.datamanager.get_firms_per_months(app.graph.bars_per_month)
+        app.graph.firms_counts = counts
 
 #==============App configuration methods========================================================
 
@@ -110,6 +118,7 @@ def load_data_attributes(app, datamanager):
     
     app.timelapse_started = False
     app.timelapse_forward = True #Timelapse can either run forwards or backwards
+
 
 def run_ui(datamanager): 
     app.width = 1536 #FIXME Need this for timeline scaling purposes
