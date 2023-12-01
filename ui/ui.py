@@ -11,9 +11,9 @@ def onAppStart(app): #TODO -- make UI 'fullscreen', so it doesnt mess with resiz
 def redrawAll(app):
     draw_background(app) #TODO -- clean this up
     draw_screen(app)
-    app.timelapse_btn.draw_timelapse_btn()
-    app.timelapse_forward_btn.draw_forward_btn()
-    app.timelapse_back_btn.draw_back_btn()
+    app.uilayout.timelapse_btn.draw_timelapse_btn()
+    app.uilayout.timelapse_forward_btn.draw_forward_btn()
+    app.uilayout.timelapse_back_btn.draw_back_btn()
     #app.axis_btn_header.draw_axis_header()
     app.timeline.draw_timeline()
     app.timeline.draw_slider()
@@ -36,8 +36,20 @@ def draw_background(app):
 def draw_screen(app):
     app.screen.draw_app_screen()
 
-def onStep(app):
+def onResize(app):
     update_app_size(app)
+    
+
+def update_app_size(app):
+    '''Constinuously updates the dimensions of the app in the global config.'''
+    app.config.set_appsize(app.width, app.height)
+    app.uilayout.fix_element_layouts() #Update the layout values
+    app.uilayout.place_ui_elements() #Update the widget instances with the new layout values
+    
+
+    app.timeline.set_size()
+
+def onStep(app):
     if app.timelapse_started:
         if app.timelapse_forward:
             dt = 1
@@ -45,12 +57,8 @@ def onStep(app):
             dt = -1
         update_screen(app, dt)
         update_timeline_slider(app, dt)
-        
 
-def update_app_size(app):
-    '''Constinuously updates the dimensions of the app in the global config.'''
-    app.config.set_appsize(app.width, app.height)
-    app.timeline.set_size()
+
 
 def update_screen(app, dt:int):
     '''Adds new firms onto the appscreen.'''
@@ -109,14 +117,19 @@ def onKeyPress(app, key): #TODO -- using keys for testing purposes. .. in realit
 def load_ui_elements(app):
     '''Creates instances of the UI assets from the assets.py file and stores them as attributes in the app class.'''
     app.config = ui.assets.VisualConfig(app.width, app.height, bgcolor=(33, 33, 33))
+    app.uilayout = ui.assets.UILayout(app.config) #Elements loaded within this class
+    app.uilayout.load_ui_elements()
+    app.uilayout.fix_element_layouts() #FIXME -- could be named better
+    app.uilayout.place_ui_elements()
+
+
     app.screen = ui.assets.AppScreen(app.config, border=(48, 48, 48))
-    app.timelapse_btn = ui.assets.TimelapseBtn(app.config)
-    app.timelapse_forward_btn = ui.assets.TimelapseForwardBtn(app.config)
-    app.timelapse_back_btn = ui.assets.TimelaspeBackBtn(app.config)
+    
+    #app.timelapse_back_btn = ui.assets.TimelaspeBackBtn(app.config)
     #app.axis_btn_header = ui.assets.AxisTabHeader(app.config, color=(250, 243, 243))
     app.timeline = ui.assets.Timeline(app.config, color=(129, 134, 156), slider_color=(250, 243, 243))
 
-    counts = app.datamanager.get_firms_per_months(1) #FIXME -- 1 is a placeholder val heree
+    counts = app.datamanager.get_firms_per_months(1) 
     app.graph = ui.assets.Graph(app.config, counts, bgcolor=(46, 53, 83), axiscolor=(250, 243, 243),
                                 barcolor=(224, 102, 102), selected_barcolor=(234, 153, 153))
     
@@ -132,9 +145,7 @@ def load_data_attributes(app, datamanager):
     app.bar_showing_info = None #The current bar on the graph displaying its info panel when 
 
 
-def run_ui(datamanager): 
-    app.width = 1536 #FIXME Need this for timeline scaling purposes
-    app.height = 793
+def run_ui(datamanager):
     load_data_attributes(app, datamanager)
     load_ui_elements(app)
     runApp()

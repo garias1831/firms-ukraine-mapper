@@ -1,3 +1,4 @@
+import copy
 from cmu_graphics import *
 import datetime
 import os
@@ -21,11 +22,85 @@ class VisualConfig: #TODO -- gernerally, the code for this lowkey sucks, and a l
         self.btn_panel_width = 7.5*appwidth/24
 
     def set_appsize(self, width, height):
-        '''Sets app size if changed'''
+        '''Updates the app's width and height values if changed via a call to onResize.'''
+        #Set the config's width and height values
         self.appwidth = width
         self.appheight = height
+        self.btn_panel_width = 7.5*width/24
 
-        self.btn_panel_width = 7.5*width/24        
+    def resize_ui_elements(self, element, *args): #Want to get this called from ui, and to resize all elements based on the factor
+        '''Takes in array of scaling coefficients'''
+        pass        
+
+
+class UILayout: #NOTE -- okay to hardcode coords here, but not in the individual app classes
+    '''Holds Widget objects as well as their position on the canvas and their sizes. '''
+    def __init__(self, config:VisualConfig) -> None:
+        self.config = config
+        self.layouts = dict() #Dict of layouts and their associated elements
+        
+    def load_ui_elements(self):
+        '''Instantiates objects on the UI. Called once in onAppStart'''
+        # self.timelapse_btn = TimelapseBtn(self.config, self.timelapse_layout['x'], self.timelapse_layout['y'],
+        #                                         self.timelapse_layout['width'], self.timelapse_layout['height'])
+        self.timelapse_btn = TimelapseBtn(self.config)
+        self.timelapse_forward_btn = TimelapseForwardBtn(app.config)
+        self.timelapse_back_btn = TimelaspeBackBtn(app.config)
+
+    def fix_element_layouts(self):
+        '''Loads positioning and sizes for all elements on the UI. Also updated in onResize'''
+        appwidth = self.config.appwidth
+        appheight = self.config.appheight
+        panel_width = self.config.btn_panel_width
+
+        #Define a base layout dictionary. All elements will have an x and y coordinate, as well as a width and a height
+        layout = {'x': 0, 'y': 0, 'width':0, 'height': 0}
+
+        timelapse_layout = copy.copy(layout)
+        timelapse_layout['x'], timelapse_layout['y']  = 40*panel_width/100, 11*appheight/15
+        timelapse_layout['width'], timelapse_layout['height'] = 20*panel_width/100, appheight/8
+        self.layouts[self.timelapse_btn] = timelapse_layout
+
+        fwd_layout = copy.copy(layout)
+        fwd_layout['width'], fwd_layout['height'] = 33*panel_width/100, appheight/10
+        fwd_layout['x'], fwd_layout['y'] = 62*panel_width/100, 11*appheight/15 + (1/10) * appheight/10
+        self.layouts[self.timelapse_forward_btn] = fwd_layout
+
+        back_layout = copy.copy(layout)
+        back_layout['width'], back_layout['height'] = 33*panel_width/100, appheight/10
+        back_layout['x'], back_layout['y'] = 5*panel_width/100, 11*appheight/15 + (1/10) * appheight/10
+        self.layouts[self.timelapse_back_btn] = back_layout
+
+        
+    def place_ui_elements(self):
+        #All widgets, so we chill
+        for element in self.layouts:
+            layout = self.layouts[element]
+
+            element.x = layout['x']
+            element.y = layout['y']
+            element.width = layout['width']
+            element.height = layout['height']
+
+
+
+
+
+class Widget: #FIXME -- might delete this widget class, is not rly useful
+    '''Base object for visual elements in the application. This class should not be instantiated on its own.
+    The class contains information about its position and size, and generally things that everything on the UI should have. Instance
+    attribtutes of this object are expected to be ovverwritten by inheriting objects.'''
+    def __init__(self) -> None:
+
+        self.x = None
+        self.y = None
+        self.width = None
+        self.height = None
+
+    #We're going to be putting these in dicts
+    def __hash__(self) -> int:
+        return(hash(str(self)))
+
 
 class AppScreen:
     '''Defines the map display where FIRMS data will be mapped.
@@ -34,8 +109,6 @@ class AppScreen:
     def __init__(self, config, border):
         self.config = config
         self.border = border
-        
-        #self.img_path = r'C:\code\python\firms-ukraine-mapper\ui\images\ukraine.png' #FIXME -- make this not absolute (and all the paths tbhs!)
         self.img_path = os.path.join(ROOT_DIR, r'ui\images', 'ukraine.png')
         self.firms = None #FIXME -- would probably be nicer just to pass in data from datamanager in to this, rather than modifying this attribute (which is a lot less readable!)
 
@@ -56,12 +129,6 @@ class AppScreen:
         appwidth = self.config.appwidth
         appheight = self.config.appheight
 
-        #Lattitude and longitude values of Ukraine borders
-        # lat_top = 52.4214
-        # lat_btm = 44.376
-        # long_left = 22.2014
-        # long_right = 40.2182
-
         lat_top = 52.8583 
         lat_btm = 43.776
         long_left = 21.3046
@@ -70,10 +137,7 @@ class AppScreen:
         latitude_vals = self.firms['latitude']
         longitude_vals = self.firms['longitude']
         
-        #print(firms.index)
         for idx in self.firms.index:
-            #print(idx)
-            #print(latitude_vals)
             latitude = latitude_vals.loc[idx]
             longitude = longitude_vals.loc[idx]
 
@@ -85,66 +149,51 @@ class AppScreen:
             screen_width = 7*appwidth/12
             screen_height = 11*appheight/15
 
-            #print(latitude, longitude)
             #Latitude longitude goes up-down (like an x-y canvas), but graphics canvas goes up-down, hence the expression for the y-coord 
             drawRect(screen_left + float(delta_x*screen_width), screen_top + (screen_height - float(delta_y*screen_height)),
                      6, 6, fill='red', align='center')
         
-    def get_min_dimensions(self):
-        '''Gets the minimum possible dimensions that the screen can be resized.'''
 
-#TODO-- might create a base btn class with a intercept_click method or somethin (just for dry purposes)
+class Button(Widget):
+    def __init__(self) -> None:
+        pass
 
-class TimelapseBtn:
+    def mouse_over(self, mouseX, mouseY):
+        pass
+
+    def on_press(self): #Might not need
+        pass
+
+
+class TimelapseBtn(Button):
     '''Toggles whether or not the timelapse is running or paused.'''
     def __init__(self, config):
         self.config = config
        
         self.img_path = os.path.join(ROOT_DIR, r'ui\images', 'playbtn.png')  #TODO - gonna be one of these two
-        #self.img_path = r'C:\code\python\firms-ukraine-mapper\ui\images\pausebtn.png'   
+
+        #self.img_path = r'C:\code\python\firms-ukraine-mapper\ui\images\pausebtn.png'  
                 
     def draw_timelapse_btn(self):
-        appwidth = self.config.appwidth
-        appheight = self.config.appheight
-        panel_width = self.config.btn_panel_width
-
-        x, y = 40*panel_width/100, 11*appheight/15 
-        width, height = 20*panel_width/100, appheight/8
-    
-        drawImage(self.img_path, x, y, width=width, height=height) #TODO -- temp coords
+        drawImage(self.img_path, self.x, self.y, width=self.width, height=self.height) 
 
 
-class TimelapseForwardBtn:
+class TimelapseForwardBtn(Button): #TODO -- a setter method might be nice for these
     def __init__(self, config):
         self.config = config
         self.img_path =  self.img_path = os.path.join(ROOT_DIR, r'ui\images', 'forwardbtn.png')
 
     def draw_forward_btn(self):
-        appwidth = self.config.appwidth
-        appheight = self.config.appheight
-        panel_width = self.config.btn_panel_width
-
-        width, height = 33*panel_width/100, appheight/10
-        x, y = 62*panel_width/100, 11*appheight/15 + (1/10) * height
-
-        drawImage(self.img_path, x, y, width=width, height=height)
+        drawImage(self.img_path, self.x, self.y, width=self.width, height=self.height)
 
 
-class TimelaspeBackBtn:
+class TimelaspeBackBtn(Button):
     def __init__(self, config):
         self.config = config
         self.img_path = os.path.join(ROOT_DIR, r'ui\images', 'backwardsbtn.png')
 
     def draw_back_btn(self):
-        appwidth = self.config.appwidth
-        appheight = self.config.appheight
-        panel_width = self.config.btn_panel_width
-
-        
-        width, height = 33*panel_width/100, appheight/10
-        x, y = 5*panel_width/100, 11*appheight/15 + (1/10) * height
-
-        drawImage(self.img_path, x, y, width=width, height=height)
+        drawImage(self.img_path, self.x, self.y, width=self.width, height=self.height)
 
 
 class Timeline: #might be a better name for this?
@@ -296,7 +345,7 @@ class Graph:
 
     def draw_info_if_hovering(self, bar_idx:int or None): 
         '''Draws a little text box displaying the date associated with the bar and how many firms events occured on that date.'''
-        if bar_idx == None or bar_idx > len(self.firms_counts): #Need to add this second case if the user tries scaling the bars while hovering over a bar
+        if bar_idx == None or bar_idx > len(self.firms_counts) or bar_idx > len(self.bars): #Need to add this second case if the user tries scaling the bars while hovering over a bar
             return
         
         #Date range associated with the bar
