@@ -21,7 +21,7 @@ def redrawAll(app):
 
     timelapse_month_yr = datetime.date(year=app.timelapse_date.year, month=app.timelapse_date.month, day=1)
     app.graph.draw_bars(timelapse_month_yr)
-
+    app.graph.draw_trendline()
     app.graph.draw_info_if_hovering(app.bar_showing_info)
     
 
@@ -100,11 +100,13 @@ def onKeyPress(app, key):
         app.graph.bars_per_month += 1
         counts = app.datamanager.get_firms_per_months(app.graph.bars_per_month) #FIXME -- dis a lil laggy, but is okay
         app.graph.firms_counts = counts
+        app.graph.coeffs = app.datamanager.get_trendline_coeffs(counts)
     if key == 'm':
         print('Scale graph down!')
         app.graph.bars_per_month -= 1
         counts = app.datamanager.get_firms_per_months(app.graph.bars_per_month)
         app.graph.firms_counts = counts
+        app.graph.coeffs = app.datamanager.get_trendline_coeffs(counts)
 
 #==============App configuration methods========================================================
 
@@ -116,13 +118,13 @@ def load_ui_elements(app):
     app.uilayout.fix_element_layouts()
     app.uilayout.place_ui_elements()
 
-
     app.screen = ui.assets.AppScreen(app.config, border=(48, 48, 48)) #TODO -- put these into the uilayout class
     app.timeline = ui.assets.Timeline(app.config, color=(129, 134, 156), slider_color=(250, 243, 243))
     counts = app.datamanager.get_firms_per_months(1) 
-    app.graph = ui.assets.Graph(app.config, counts, bgcolor=(46, 53, 83), axiscolor=(250, 243, 243),
+    coeffs = app.datamanager.get_trendline_coeffs(counts)
+    app.graph = ui.assets.Graph(app.config, counts, coeffs, bgcolor=(46, 53, 83), axiscolor=(250, 243, 243),
                                 barcolor=(224, 102, 102), selected_barcolor=(234, 153, 153))
-    
+
 
 def load_data_attributes(app, datamanager):
     '''Loads data related to the application state.'''

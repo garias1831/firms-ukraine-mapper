@@ -86,6 +86,27 @@ class DataManager:
                 count_per_months[month_range] += firms_month_count
 
         return count_per_months
+    
+    def get_trendline_coeffs(self, count_per_months:dict):
+        '''Gets the coefficients a and b for the equation y = ax + b, which will be plotted in the graph. Uses
+        least squares approximation. See README for formula citation. To be used with the dict returned by get_firms_per_months.'''
+
+        counts = count_per_months
+
+        x_vals = range(1, len(counts) + 1) #We have one bar for each entry in count per months      
+        y_vals = [counts[k] for k in counts]
+
+        n = len(counts) #Number of (x, y) pairs we have, in this case equal to the number of bars
+        sum_x = sum(x_vals)
+        sum_y = sum(y_vals)
+        sum_x_squares = sum([x**2 for x in x_vals])
+        sum_x_y = sum([x_vals[i] * y_vals[i] for i in range(len(counts))])
+
+        b = ((n * sum_x_y) - (sum_x * sum_y)) / ((n * sum_x_squares) - (sum_x)**2) #y-intercept (might wanna abs this, because its negative)
+
+        a = (sum_y - b * sum_x) / n #Slope of the best-fit line
+        
+        return float(a), float(b)
 
 
 

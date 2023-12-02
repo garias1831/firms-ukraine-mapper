@@ -14,3 +14,6 @@ Nasa Firms website, also is where I got data
 https://docs.python.org/3/ python docs
 https://pandas.pydata.org/docs/ pandas docs
 https://academy.cs.cmu.edu/docs cmu_graphics docs
+
+Algebraic least squares formula:
+https://byjus.com/maths/least-square-method/#:~:text=The%20least%20square%20method%20is,the%20points%20from%20the%20curve.

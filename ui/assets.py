@@ -163,8 +163,6 @@ class Button(Widget):
         return False
 
 
-
-
 class TimelapseBtn(Button):
     '''Toggles whether or not the timelapse is running or paused.'''
     def __init__(self, config):
@@ -249,6 +247,7 @@ class AxisTabHeader: #TODO -- class might be not necceasry
         under_x, under_y = 5*panel_width/100, text_y + text_height 
         drawRect(under_x, under_y, 85*panel_width/100, appheight/100, fill=rgb(*self.underline))
 
+
 class GraphBar:
     '''Defines an individual bar that will appear in the app graph.'''
     def __init__(self, left, bottom, width, height) -> None:
@@ -256,9 +255,6 @@ class GraphBar:
         self.bottom = bottom
         self.width = width
         self.height = height
-
-    def draw_bar(self): #Might implement
-        pass
 
     def mouse_over_bar(self, mouseX, mouseY):  #FIXME -- this method is a little jank
         if ((self.left <= mouseX and mouseX <= self.left + self.width) and
@@ -268,9 +264,6 @@ class GraphBar:
             #date = self.firms_counts.keys()[x] 
             return True
         return False
-    
-    def draw_bar_info(self):
-        print('drawin:')
 
 
 class Graph:
@@ -278,7 +271,7 @@ class Graph:
     Attributes:
         firms_counts: dict{(datetime.date, datetime.date): int}. Has keys of datetime.date objects representing the given date range
         in which FIRMS data was collected during the timelapse. Values represent the numebr of firms events corresponding to a given range.'''
-    def __init__(self, config, firms_counts:dict, bgcolor, axiscolor, barcolor, selected_barcolor,) -> None:
+    def __init__(self, config, firms_counts:dict, coeffs:tuple, bgcolor, axiscolor, barcolor, selected_barcolor,) -> None:
         self.config = config
         self.bg = bgcolor
         self.axis = axiscolor
@@ -286,8 +279,10 @@ class Graph:
         self.selected_barcolor = selected_barcolor
 
         self.bars = []  #List of graphbar objects
-        self._bars_per_month = 1
-        self.firms_counts = firms_counts #Will be set from ui.ui
+        self._bars_per_month = 1 #FIXME -- this is poorly named, as this is what gets passed to the datamaneger to generate the firms_counts dict
+        self.firms_counts = firms_counts #Set from ui.ui
+        self.trendline_coeffs = coeffs #Stored as (a, b), where a is the slope and b is the y-intercept
+
     @property
     def bars_per_month(self): #FIXME Not sure if i need dis
         return self._bars_per_month
@@ -328,7 +323,6 @@ class Graph:
         for dx, date in enumerate(self.firms_counts):
             
             #If the timelapse date is the same as the date for this bar, change the color
-
             start_date = date[0]
             end_date = date[1]
             if start_date <= timelapse_month_yr and timelapse_month_yr <= end_date:
@@ -349,7 +343,38 @@ class Graph:
         self.bars = current_bars
 
     def draw_trendline(self): 
-        pass
+        appwidth = self.config.appwidth
+        appheight = self.config.appheight
+        panel_width = self.config.btn_panel_width
+
+        graph_height = 67*appheight/100
+        graph_width = 90*panel_width/100
+        graph_left = 5*panel_width/100
+        graph_bottom = 70*appheight/100
+
+        total_bars = len(self.firms_counts)
+        largest_count = max(self.firms_counts.values())
+        bar_width = graph_width/total_bars - graph_width/100
+
+        a, b = self.trendline_coeffs
+
+        x0 = graph_left + 0.5*graph_width/100 + bar_width/2
+        xf = graph_left + graph_width - 0.5*graph_width/100 - bar_width/2
+
+        first_line_eq = a*1 + b #Get value for x = bar 1
+        second_line_eq = a*total_bars + b #Get y val for x = bar 2
+
+        y0 = float(graph_bottom - (first_line_eq)*graph_height/largest_count) 
+        yf = float(graph_bottom - (second_line_eq)*graph_height/largest_count) 
+    
+        if yf < graph_bottom - graph_height:
+            yf = graph_bottom - graph_height #Because the trendline has a large slope, we need to cap it off at the top of the graph such that it doesn't go over
+            #FIXME -- (turns out, it always is, (ig trendline is just too fat... not sure if this is a bug, or just how the math works out, but eh))
+            
+
+        drawLine(x0, y0, xf, yf, fill='green', lineWidth=4, dashes=True)
+    
+
 
     def draw_info_if_hovering(self, bar_idx:int or None): 
         '''Draws a little text box displaying the date associated with the bar and how many firms events occured on that date.'''
@@ -370,7 +395,6 @@ class Graph:
         text = f'FIRMS events from {startdate} to {enddate}: {count}'
         
         #Draw the label:==========================
-
         appwidth = self.config.appwidth
         appheight = self.config.appheight
         panel_width =  self.config.btn_panel_width
