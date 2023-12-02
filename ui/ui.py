@@ -59,7 +59,6 @@ def onStep(app):
         update_timeline_slider(app, dt)
 
 
-
 def update_screen(app, dt:int):
     '''Adds new firms onto the appscreen.'''
     app.screen.firms = app.datamanager.get_firms_from_date(app.timelapse_date)
@@ -72,7 +71,13 @@ def update_timeline_slider(app, dt:int):
     appwidth = app.config.appwidth
 
 def onMousePress(app, mouseX, mouseY):
-    pass
+    if app.uilayout.timelapse_btn.click_intercepted(mouseX, mouseY):
+        app.uilayout.timelapse_btn.pressed(app)
+    if app.uilayout.timelapse_forward_btn.click_intercepted(mouseX, mouseY):
+        app.timelapse_forward = True
+    if app.uilayout.timelapse_back_btn.click_intercepted(mouseX, mouseY):
+        app.timelapse_forward = False
+
 
 def onMouseMove(app, mouseX, mouseY):
     check_bar_hovering(mouseX, mouseY)
@@ -89,19 +94,8 @@ def check_bar_hovering(mouseX, mouseY):
 def onMouseDrag(app, mouseX, mouseY):
     print(mouseX, mouseY)
 
-def onKeyPress(app, key): #TODO -- using keys for testing purposes. .. in reality, buttons should control the logic flow
-    if key == 'p': #Testing purposes
-        print('Timeline start!')
-        app.timelapse_started = not app.timelapse_started
-    
-    if key == 'b':
-        print('timelapse backwards')
-        app.timelapse_forward = False
-    if key == 'f':
-        print('timelapse forwards')
-        app.timelapse_forward = True
-
-    if key == 'n': #FIXME Might keep some key presses for scaling the graph, espesh if i cant find space for some btns
+def onKeyPress(app, key): 
+    if key == 'n': #TODO Might keep some key presses for scaling the graph, espesh if i cant find space for some btns
         print('Scale graph up')
         app.graph.bars_per_month += 1
         counts = app.datamanager.get_firms_per_months(app.graph.bars_per_month) #FIXME -- dis a lil laggy, but is okay
@@ -119,16 +113,12 @@ def load_ui_elements(app):
     app.config = ui.assets.VisualConfig(app.width, app.height, bgcolor=(33, 33, 33))
     app.uilayout = ui.assets.UILayout(app.config) #Elements loaded within this class
     app.uilayout.load_ui_elements()
-    app.uilayout.fix_element_layouts() #FIXME -- could be named better
+    app.uilayout.fix_element_layouts()
     app.uilayout.place_ui_elements()
 
 
-    app.screen = ui.assets.AppScreen(app.config, border=(48, 48, 48))
-    
-    #app.timelapse_back_btn = ui.assets.TimelaspeBackBtn(app.config)
-    #app.axis_btn_header = ui.assets.AxisTabHeader(app.config, color=(250, 243, 243))
+    app.screen = ui.assets.AppScreen(app.config, border=(48, 48, 48)) #TODO -- put these into the uilayout class
     app.timeline = ui.assets.Timeline(app.config, color=(129, 134, 156), slider_color=(250, 243, 243))
-
     counts = app.datamanager.get_firms_per_months(1) 
     app.graph = ui.assets.Graph(app.config, counts, bgcolor=(46, 53, 83), axiscolor=(250, 243, 243),
                                 barcolor=(224, 102, 102), selected_barcolor=(234, 153, 153))

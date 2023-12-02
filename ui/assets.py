@@ -83,10 +83,7 @@ class UILayout: #NOTE -- okay to hardcode coords here, but not in the individual
             element.height = layout['height']
 
 
-
-
-
-class Widget: #FIXME -- might delete this widget class, is not rly useful
+class Widget:
     '''Base object for visual elements in the application. This class should not be instantiated on its own.
     The class contains information about its position and size, and generally things that everything on the UI should have. Instance
     attribtutes of this object are expected to be ovverwritten by inheriting objects.'''
@@ -158,11 +155,14 @@ class Button(Widget):
     def __init__(self) -> None:
         pass
 
-    def mouse_over(self, mouseX, mouseY):
-        pass
+    def click_intercepted(self, mouseX, mouseY):
+        #Assuming align = left-top here
+        if (self.x <= mouseX <= self.x + self.width and
+            self.y <= mouseY <= self.y + self.height):
+            return True
+        return False
 
-    def on_press(self): #Might not need
-        pass
+
 
 
 class TimelapseBtn(Button):
@@ -173,7 +173,15 @@ class TimelapseBtn(Button):
         self.img_path = os.path.join(ROOT_DIR, r'ui\images', 'playbtn.png')  #TODO - gonna be one of these two
 
         #self.img_path = r'C:\code\python\firms-ukraine-mapper\ui\images\pausebtn.png'  
-                
+    #Here, app is the cmu graphics app
+    def pressed(self, app):
+        app.timelapse_started = not app.timelapse_started #TODO -- need to change the img
+        if app.timelapse_started:
+            self.img_path = os.path.join(ROOT_DIR, r'ui\images', 'pausebtn.png')
+        else:
+            self.img_path = os.path.join(ROOT_DIR, r'ui\images', 'playbtn.png')
+
+
     def draw_timelapse_btn(self):
         drawImage(self.img_path, self.x, self.y, width=self.width, height=self.height) 
 
@@ -205,7 +213,7 @@ class Timeline: #might be a better name for this?
         self.slider_min = self.config.appwidth/40 #TODO -- need to place upper and lower bounds on the timeline dates
         self.timelapse_progress = 0 #The day the timelapse is currently on as a percentage of all the dates in the timmelapse
 
-    def set_size(self): #TODO -- not drawing at the correct spot, prob bc of this method, but whatever
+    def set_size(self): 
         self.slider_min = self.config.appwidth/40 #Reset with new appwidth val (called from update_app_size in ui.py)
 
     def draw_timeline(self):
@@ -281,7 +289,7 @@ class Graph:
         self._bars_per_month = 1
         self.firms_counts = firms_counts #Will be set from ui.ui
     @property
-    def bars_per_month(self):
+    def bars_per_month(self): #FIXME Not sure if i need dis
         return self._bars_per_month
 
     @bars_per_month.setter
@@ -345,7 +353,7 @@ class Graph:
 
     def draw_info_if_hovering(self, bar_idx:int or None): 
         '''Draws a little text box displaying the date associated with the bar and how many firms events occured on that date.'''
-        if bar_idx == None or bar_idx > len(self.firms_counts) or bar_idx > len(self.bars): #Need to add this second case if the user tries scaling the bars while hovering over a bar
+        if bar_idx == None or bar_idx > len(self.firms_counts) or bar_idx < 0: #Need to add this second case if the user tries scaling the bars while hovering over a bar
             return
         
         #Date range associated with the bar
@@ -373,7 +381,3 @@ class Graph:
 
         drawLabel(text, graph_left + graph_width/2, graph_top + 2*appheight/100,
                   size=18, font='montserrat', fill='white') #FIXME Font not working, but whatever ig
-        
-    
-
-
