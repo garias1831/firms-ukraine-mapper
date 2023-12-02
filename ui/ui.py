@@ -62,13 +62,15 @@ def onStep(app):
 def update_screen(app, dt:int):
     '''Adds new firms onto the appscreen.'''
     app.screen.firms = app.datamanager.get_firms_from_date(app.timelapse_date)
-    app.timelapse_date += dt*datetime.timedelta(days=1) 
+    next_date = app.timelapse_date + dt*datetime.timedelta(days=1) 
+    if app.datamanager.is_valid_date(next_date):
+        app.timelapse_date = next_date
+        
 
 def update_timeline_slider(app, dt:int):
     timelapse_progress = app.datamanager.get_timelapse_progress(app.timelapse_date)
     app.timeline.timelapse_progress = timelapse_progress
 
-    appwidth = app.config.appwidth
 
 def onMousePress(app, mouseX, mouseY):
     if app.uilayout.timelapse_btn.click_intercepted(mouseX, mouseY):
@@ -92,7 +94,12 @@ def check_bar_hovering(mouseX, mouseY):
 
 
 def onMouseDrag(app, mouseX, mouseY):
-    print(mouseX, mouseY)
+    #print(mouseX, mouseY)
+    if app.timeline.mouse_over_slider(mouseX, mouseY):
+        progress = app.timeline.get_timelapse_progress_from_x(mouseX)
+        app.timelapse_date = app.datamanager.get_closest_date_from_progress(progress)
+        app.timeline.timelapse_progress = progress
+        
 
 def onKeyPress(app, key): 
     if key == 'n': #TODO Might keep some key presses for scaling the graph, espesh if i cant find space for some btns

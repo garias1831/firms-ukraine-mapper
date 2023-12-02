@@ -18,7 +18,12 @@ class DataManager:
 
         #Convert all strings in the dataframe to datetime.date objects
         self.firms['acq_date'] = self.firms['acq_date'].apply(str_to_date)
-            
+
+    def is_valid_date(self, date:datetime.date):
+        dates = self.firms['acq_date'].drop_duplicates()
+        if date < dates.iloc[0] or dates.iloc[-1] < date:
+            return False 
+        return True
 
     def get_firms_from_date(self, enddate:datetime.date): #TODO -- should make this able to get the last x days worth of data (ez fix)
         '''Gets the last 3 days's worth of firms based on the given end date, inclusive. For example, if end= "2022-03-07",
@@ -36,8 +41,9 @@ class DataManager:
         series_dates = self.firms['acq_date'].drop_duplicates()
         
         dates_until_now = series_dates.loc[series_dates <= curr_date]
-    
-        progress = len(dates_until_now) / len(series_dates)
+
+        progress = len(dates_until_now) / len(series_dates) #Percentage of the current date number we're on vs the total number of dates in the timelaps
+        
         return progress
     
     def get_firms_per_months(self, months_per:int): #FIXME -- figure out how the graph is gonna work , and implement the months_per para
@@ -87,6 +93,17 @@ class DataManager:
 
         return count_per_months
     
+    def get_closest_date_from_progress(self, timelapse_progress:float): #Def not named amazingly
+        dates = self.firms['acq_date'].drop_duplicates()
+        dates.index = range(1, len(dates)+1)
+
+        progress_series = pd.Series(dates.index).apply(lambda i: i/len(dates))
+        
+        #The closest index is the one where the diff between the timelapse progress is closest to zero 
+        closest_idx = (abs(progress_series - timelapse_progress)).idxmin()
+        date = dates.iloc[closest_idx]
+        return date
+
     def get_trendline_coeffs(self, count_per_months:dict):
         '''Gets the coefficients a and b for the equation y = ax + b, which will be plotted in the graph. Uses
         least squares approximation. See README for formula citation. To be used with the dict returned by get_firms_per_months.'''

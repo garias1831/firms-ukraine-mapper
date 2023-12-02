@@ -227,6 +227,35 @@ class Timeline: #might be a better name for this?
         #Times the timeline width
         drawRect(self.slider_min + (self.timelapse_progress)*(38*appwidth/40 - 0.5*appwidth/40), 63.5*appheight/72 , 
                  0.5*appwidth/40, 8*appheight/72, fill=rgb(*self.slider_color))
+    
+    def mouse_over_slider(self, mouseX, mouseY):
+        appwidth = self.config.appwidth
+        appheight = self.config.appheight
+        
+        slider_width = 0.5*appwidth/40
+        slider_height = 8*appheight/72
+        x = self.slider_min + (self.timelapse_progress)*(38*appwidth/40 - 0.5*appwidth/40) 
+        y = 63.5*appheight/72
+
+        offset = 3*appwidth/40 #The slider itself is quite small, so we want a bit of offset so the user can drag both ways smoothly (at least horizontally)
+        if (x - offset <= mouseX <= x + slider_width + offset and y <= mouseY <= y + slider_height):
+            return True
+        
+        return False
+
+
+    def get_timelapse_progress_from_x(self, newX):
+        appwidth = self.config.appwidth
+        appheight = self.config.appheight
+
+        #newX =self.slider_min + (self.timelapse_progress)*(38*appwidth/40 - 0.5*appwidth/40)
+
+        timelapse_progress = (newX - self.slider_min) / (38*appwidth/40 - 0.5*appwidth/40)
+        if timelapse_progress < 0:
+            return 0
+        if timelapse_progress > 1:
+            return 1
+        return timelapse_progress
 
 
 class AxisTabHeader: #TODO -- class might be not necceasry
