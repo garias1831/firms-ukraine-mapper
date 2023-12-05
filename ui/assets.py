@@ -112,13 +112,14 @@ class AppScreen:
               border=rgb(*self.border), borderWidth=3)
         
     def draw_firms(self):
-        '''Draws FIRMS data on the AppScreen from the slelf.firms DataFrame'''
+        '''Draws FIRMS data on the AppScreen from the self.firms DataFrame'''
         if self.firms is None: #Can't test equality with pandas series, so need to use is here
             return
 
         appwidth = self.config.appwidth
         appheight = self.config.appheight
 
+        #Latitude and longitude cordinates; will be used to scale FIRMS points (which are stored as latitude, longitude points)
         lat_top = 52.8583 
         lat_btm = 43.776
         long_left = 21.3046
@@ -141,7 +142,7 @@ class AppScreen:
 
             #Latitude longitude goes up-down (like an x-y canvas), but graphics canvas goes up-down, hence the expression for the y-coord 
             drawRect(screen_left + float(delta_x*screen_width), screen_top + (screen_height - float(delta_y*screen_height)),
-                     6, 6, fill='red', align='center')
+                     6, 6, fill='red', align='center', opacity=25)
         
 
 class Button(Widget):
