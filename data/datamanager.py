@@ -28,7 +28,7 @@ class DataManager:
     def get_firms_from_date(self, enddate:datetime.date): #TODO -- should make this able to get the last x days worth of data (ez fix)
         '''Gets the last 3 days's worth of firms based on the given end date, inclusive. For example, if end= "2022-03-07",
         this method would return a DataFrame containing all firms from 2022-03-04 to 2022-03-07.'''
-        startdate = enddate - datetime.timedelta(days=3)
+        startdate = enddate - datetime.timedelta(days=1)
 
         #pd.Series with all of the firms dates but as datetime.date objects
         datetime_series = self.firms['acq_date']

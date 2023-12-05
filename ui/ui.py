@@ -3,7 +3,7 @@ import ui.assets
 import datetime
 
 def onAppStart(app): 
-    app.stepsPerSecond = 50 #FIXME -- not rrly sure how fast i want the app to run, or how many shapes we should allow, but dis works
+    app.stepsPerSecond = 10 #FIXME -- not rrly sure how fast i want the app to run, or how many shapes we should allow, but dis works
     app.setMaxShapeCount(8000)
 
 def redrawAll(app):
