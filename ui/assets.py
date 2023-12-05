@@ -5,7 +5,7 @@ import os
 from config.definitions import ROOT_DIR
 import pandas as pd
 
-class VisualConfig: #TODO -- gernerally, the code for this lowkey sucks, and a lot of it is kinda hardcoded, but for now is good, make it better later tho
+class VisualConfig: 
     '''Global configuration for app visual state. Includes data such as primary/secondary colors.
     Attributes:
         bgcolor, tuple<int>:
@@ -28,10 +28,6 @@ class VisualConfig: #TODO -- gernerally, the code for this lowkey sucks, and a l
         self.appheight = height
         self.btn_panel_width = 7.5*width/24
 
-    def resize_ui_elements(self, element, *args): #Want to get this called from ui, and to resize all elements based on the factor
-        '''Takes in array of scaling coefficients'''
-        pass        
-
 
 class UILayout: #NOTE -- okay to hardcode coords here, but not in the individual app classes
     '''Holds Widget objects as well as their position on the canvas and their sizes. '''
@@ -41,8 +37,6 @@ class UILayout: #NOTE -- okay to hardcode coords here, but not in the individual
         
     def load_ui_elements(self):
         '''Instantiates objects on the UI. Called once in onAppStart'''
-        # self.timelapse_btn = TimelapseBtn(self.config, self.timelapse_layout['x'], self.timelapse_layout['y'],
-        #                                         self.timelapse_layout['width'], self.timelapse_layout['height'])
         self.timelapse_btn = TimelapseBtn(self.config)
         self.timelapse_forward_btn = TimelapseForwardBtn(app.config)
         self.timelapse_back_btn = TimelaspeBackBtn(app.config)
@@ -94,7 +88,7 @@ class Widget:
         self.width = None
         self.height = None
 
-    #We're going to be putting these in dicts
+    #We're going to be putting these in dicts, so we need to ovveride __hash__
     def __hash__(self) -> int:
         return(hash(str(self)))
 
@@ -107,14 +101,14 @@ class AppScreen:
         self.config = config
         self.border = border
         self.img_path = os.path.join(ROOT_DIR, r'ui\images', 'ukraine.png')
-        self.firms = None #FIXME -- would probably be nicer just to pass in data from datamanager in to this, rather than modifying this attribute (which is a lot less readable!)
+        self.firms = None 
 
-    def draw_app_screen(self): #TODO -- all thest 'draw thing' methods need some fixing .. specifically, they should probably take in location params form outside, rather then hardcoding them in the class
+    def draw_app_screen(self): 
         appwidth = self.config.appwidth
         appheight = self.config.appheight
 
         drawRect(7.5*appwidth/24, 0, 7.5*appwidth/12, appheight, fill=rgb(*self.border))
-        drawImage(self.img_path, 8*appwidth/24, 2*appheight/15, width=7*appwidth/12, height=11*appheight/15, #Looks aight, but not totes epic. Also looks bad when resized souper small
+        drawImage(self.img_path, 8*appwidth/24, 2*appheight/15, width=7*appwidth/12, height=11*appheight/15,
               border=rgb(*self.border), borderWidth=3)
         
     def draw_firms(self):
@@ -168,23 +162,21 @@ class TimelapseBtn(Button):
     def __init__(self, config):
         self.config = config
        
-        self.img_path = os.path.join(ROOT_DIR, r'ui\images', 'playbtn.png')  #TODO - gonna be one of these two
+        self.img_path = os.path.join(ROOT_DIR, r'ui\images', 'playbtn.png') 
 
-        #self.img_path = r'C:\code\python\firms-ukraine-mapper\ui\images\pausebtn.png'  
     #Here, app is the cmu graphics app
     def pressed(self, app):
-        app.timelapse_started = not app.timelapse_started #TODO -- need to change the img
+        app.timelapse_started = not app.timelapse_started 
         if app.timelapse_started:
             self.img_path = os.path.join(ROOT_DIR, r'ui\images', 'pausebtn.png')
         else:
             self.img_path = os.path.join(ROOT_DIR, r'ui\images', 'playbtn.png')
 
-
     def draw_timelapse_btn(self):
         drawImage(self.img_path, self.x, self.y, width=self.width, height=self.height) 
 
 
-class TimelapseForwardBtn(Button): #TODO -- a setter method might be nice for these
+class TimelapseForwardBtn(Button): 
     def __init__(self, config):
         self.config = config
         self.img_path =  self.img_path = os.path.join(ROOT_DIR, r'ui\images', 'forwardbtn.png')
@@ -208,7 +200,7 @@ class Timeline: #might be a better name for this?
         self.color = color
         self.slider_color = slider_color
 
-        self.slider_min = self.config.appwidth/40 #TODO -- need to place upper and lower bounds on the timeline dates
+        self.slider_min = self.config.appwidth/40 
         self.timelapse_progress = 0 #The day the timelapse is currently on as a percentage of all the dates in the timmelapse
 
     def set_size(self): 
@@ -256,26 +248,6 @@ class Timeline: #might be a better name for this?
         if timelapse_progress > 1:
             return 1
         return timelapse_progress
-
-
-class AxisTabHeader: #TODO -- class might be not necceasry
-    def __init__(self, config, color):
-        self.config = config
-        self.img_url =  self.img_path = os.path.join(ROOT_DIR, r'ui\images', 'axisheader.png')
-        self.underline = color
-
-    def draw_axis_header(self):
-        appwidth = self.config.appwidth
-        appheight = self.config.appheight
-        panel_width = self.config.btn_panel_width
-
-        text_x, text_y = 7*panel_width/100, 13*appheight/24
-        text_width, text_height = 35*panel_width/100, appheight/10
-        drawImage(self.img_url, text_x, text_y, width=text_width, height=text_height)
-
-        under_x, under_y = 5*panel_width/100, text_y + text_height 
-        drawRect(under_x, under_y, 85*panel_width/100, appheight/100, fill=rgb(*self.underline))
-
 
 class GraphBar:
     '''Defines an individual bar that will appear in the app graph.'''
@@ -333,6 +305,9 @@ class Graph:
         underline_x, underline_y = x - 2*panel_width/100, y + height
         underline_width, underline_height = width + 4*panel_width/100, 1*appheight/100
         drawRect(underline_x, underline_y, underline_width , underline_height, fill=rgb(*self.axis))
+        #Draw a little splash label for keypress info
+        labelx, labely = underline_x + width/2, underline_y + 1.75*appheight/100
+        drawLabel("(Press 'n' to scale graph down and 'm' to scale graph up)", labelx, labely, fill='white')
 
     def draw_bars(self, timelapse_month_yr:datetime.date): #TODO -- a dict or series might work here
         '''Draws bars on the graph corresponding to the number of firms events per month.'''

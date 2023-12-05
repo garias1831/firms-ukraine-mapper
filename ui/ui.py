@@ -4,7 +4,7 @@ import pandas as pd
 import datetime
 
 def onAppStart(app): #TODO -- make UI 'fullscreen', so it doesnt mess with resizing attributes
-    app.stepsPerSecond = 100 #FIXME -- not rrly sure how fast i want the app to run, or how many shapes we should allow, but dis works
+    app.stepsPerSecond = 50 #FIXME -- not rrly sure how fast i want the app to run, or how many shapes we should allow, but dis works
     app.setMaxShapeCount(10000)
 
 
@@ -92,24 +92,19 @@ def check_bar_hovering(mouseX, mouseY):
     
     app.bar_showing_info = None
 
-
 def onMouseDrag(app, mouseX, mouseY):
-    #print(mouseX, mouseY)
     if app.timeline.mouse_over_slider(mouseX, mouseY):
         progress = app.timeline.get_timelapse_progress_from_x(mouseX)
         app.timelapse_date = app.datamanager.get_closest_date_from_progress(progress)
         app.timeline.timelapse_progress = progress
         
-
 def onKeyPress(app, key): 
     if key == 'n': #TODO Might keep some key presses for scaling the graph, espesh if i cant find space for some btns
-        print('Scale graph up')
         app.graph.bars_per_month += 1
         counts = app.datamanager.get_firms_per_months(app.graph.bars_per_month) #FIXME -- dis a lil laggy, but is okay
         app.graph.firms_counts = counts
         app.graph.coeffs = app.datamanager.get_trendline_coeffs(counts)
     if key == 'm':
-        print('Scale graph down!')
         app.graph.bars_per_month -= 1
         counts = app.datamanager.get_firms_per_months(app.graph.bars_per_month)
         app.graph.firms_counts = counts
