@@ -1,9 +1,8 @@
 import copy
+from config.definitions import ROOT_DIR
 from cmu_graphics import *
 import datetime
 import os
-from config.definitions import ROOT_DIR
-import pandas as pd
 
 class VisualConfig: 
     '''Global configuration for app visual state. Includes data such as primary/secondary colors.
@@ -30,7 +29,8 @@ class VisualConfig:
 
 
 class UILayout: #NOTE -- okay to hardcode coords here, but not in the individual app classes
-    '''Holds Widget objects as well as their position on the canvas and their sizes. '''
+    '''Holds Widget objects as well as their position on the canvas and their sizes. Holds objects that need to know information about
+    their position and size, such as buttons.'''
     def __init__(self, config:VisualConfig) -> None:
         self.config = config
         self.layouts = dict() #Dict of layouts and their associated elements
@@ -78,7 +78,7 @@ class UILayout: #NOTE -- okay to hardcode coords here, but not in the individual
 
 
 class Widget:
-    '''Base object for visual elements in the application. This class should not be instantiated on its own.
+    '''Base object for buttons in the application. This class should not be instantiated on its own.
     The class contains information about its position and size, and generally things that everything on the UI should have. Instance
     attribtutes of this object are expected to be ovverwritten by inheriting objects.'''
     def __init__(self) -> None:
@@ -112,9 +112,8 @@ class AppScreen:
               border=rgb(*self.border), borderWidth=3)
         
     def draw_firms(self):
-        '''Plots firms data'''
-
-        if self.firms is None:
+        '''Draws FIRMS data on the AppScreen from the slelf.firms DataFrame'''
+        if self.firms is None: #Can't test equality with pandas series, so need to use is here
             return
 
         appwidth = self.config.appwidth
@@ -161,7 +160,6 @@ class TimelapseBtn(Button):
     '''Toggles whether or not the timelapse is running or paused.'''
     def __init__(self, config):
         self.config = config
-       
         self.img_path = os.path.join(ROOT_DIR, r'ui\images', 'playbtn.png') 
 
     #Here, app is the cmu graphics app
@@ -194,7 +192,7 @@ class TimelaspeBackBtn(Button):
         drawImage(self.img_path, self.x, self.y, width=self.width, height=self.height)
 
 
-class Timeline: #might be a better name for this?
+class Timeline: 
     def __init__(self, config, color, slider_color) -> None:
         self.config = config
         self.color = color
@@ -235,12 +233,8 @@ class Timeline: #might be a better name for this?
         
         return False
 
-
     def get_timelapse_progress_from_x(self, newX):
         appwidth = self.config.appwidth
-        appheight = self.config.appheight
-
-        #newX =self.slider_min + (self.timelapse_progress)*(38*appwidth/40 - 0.5*appwidth/40)
 
         timelapse_progress = (newX - self.slider_min) / (38*appwidth/40 - 0.5*appwidth/40)
         if timelapse_progress < 0:
@@ -248,6 +242,7 @@ class Timeline: #might be a better name for this?
         if timelapse_progress > 1:
             return 1
         return timelapse_progress
+
 
 class GraphBar:
     '''Defines an individual bar that will appear in the app graph.'''
@@ -260,9 +255,7 @@ class GraphBar:
     def mouse_over_bar(self, mouseX, mouseY):  #FIXME -- this method is a little jank
         if ((self.left <= mouseX and mouseX <= self.left + self.width) and
             self.bottom - self.height <= mouseY and mouseY <= self.bottom):
-            
             #Dict is ordered, so get the date associated with this bar, and return it
-            #date = self.firms_counts.keys()[x] 
             return True
         return False
 
@@ -285,7 +278,7 @@ class Graph:
         self.trendline_coeffs = coeffs #Stored as (a, b), where a is the slope and b is the y-intercept
 
     @property
-    def bars_per_month(self): #FIXME Not sure if i need dis
+    def bars_per_month(self): 
         return self._bars_per_month
 
     @bars_per_month.setter
@@ -294,7 +287,6 @@ class Graph:
             self._bars_per_month =  _bars_per_month
        
     def draw_background(self):
-        appwidth = self.config.appwidth
         appheight = self.config.appheight
         panel_width = self.config.btn_panel_width
 
@@ -309,9 +301,8 @@ class Graph:
         labelx, labely = underline_x + width/2, underline_y + 1.75*appheight/100
         drawLabel("(Press 'n' to scale graph down and 'm' to scale graph up)", labelx, labely, fill='white')
 
-    def draw_bars(self, timelapse_month_yr:datetime.date): #TODO -- a dict or series might work here
+    def draw_bars(self, timelapse_month_yr:datetime.date):
         '''Draws bars on the graph corresponding to the number of firms events per month.'''
-        appwidth = self.config.appwidth
         appheight = self.config.appheight
         panel_width = self.config.btn_panel_width
 
@@ -347,7 +338,6 @@ class Graph:
         self.bars = current_bars
 
     def draw_trendline(self): 
-        appwidth = self.config.appwidth
         appheight = self.config.appheight
         panel_width = self.config.btn_panel_width
 
@@ -366,20 +356,16 @@ class Graph:
         xf = graph_left + graph_width - 0.5*graph_width/100 - bar_width/2
 
         first_line_eq = a*1 + b #Get value for x = bar 1
-        second_line_eq = a*total_bars + b #Get y val for x = bar 2
+        second_line_eq = a*total_bars + b #Get y val for x = last bar
 
         y0 = float(graph_bottom - (first_line_eq)*graph_height/largest_count) 
         yf = float(graph_bottom - (second_line_eq)*graph_height/largest_count) 
     
         if yf < graph_bottom - graph_height:
-            yf = graph_bottom - graph_height #Because the trendline has a large slope, we need to cap it off at the top of the graph such that it doesn't go over
-            #FIXME -- (turns out, it always is, (ig trendline is just too fat... not sure if this is a bug, or just how the math works out, but eh))
-            
+            yf = graph_bottom - graph_height #Because the trendline has a large slope, we need to cap it off at the top of the graph such that it doesn't go over            
 
         drawLine(x0, y0, xf, yf, fill='green', lineWidth=4, dashes=True)
     
-
-
     def draw_info_if_hovering(self, bar_idx:int or None): 
         '''Draws a little text box displaying the date associated with the bar and how many firms events occured on that date.'''
         if bar_idx == None or bar_idx > len(self.firms_counts) or bar_idx < 0: #Need to add this second case if the user tries scaling the bars while hovering over a bar
@@ -399,7 +385,6 @@ class Graph:
         text = f'FIRMS events from {startdate} to {enddate}: {count}'
         
         #Draw the label:==========================
-        appwidth = self.config.appwidth
         appheight = self.config.appheight
         panel_width =  self.config.btn_panel_width
 

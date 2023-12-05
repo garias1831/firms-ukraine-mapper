@@ -93,7 +93,7 @@ class DataManager:
 
         return count_per_months
     
-    def get_closest_date_from_progress(self, timelapse_progress:float): #Def not named amazingly
+    def get_closest_date_from_progress(self, timelapse_progress:float):
         dates = self.firms['acq_date'].drop_duplicates()
         dates.index = range(1, len(dates)+1)
 
