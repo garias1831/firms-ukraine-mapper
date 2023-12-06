@@ -106,7 +106,9 @@ class DataManager:
 
     def get_trendline_coeffs(self, count_per_months:dict):
         '''Gets the coefficients a and b for the equation y = ax + b, which will be plotted in the graph. Uses
-        least squares approximation. See README for formula citation. To be used with the dict returned by get_firms_per_months.'''
+        least squares approximation. See README for formula citation. To be used with the dict returned by get_firms_per_months.
+        Formula stolen from https://byjus.com/maths/least-square-method/#:~:text=The%20least%20square%20method%20is,the%20points%20from%20the%20curve.
+        '''
 
         counts = count_per_months
 

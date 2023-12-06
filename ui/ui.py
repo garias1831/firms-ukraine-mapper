@@ -3,7 +3,7 @@ import ui.assets
 import datetime
 
 def onAppStart(app): 
-    app.stepsPerSecond = 10 #FIXME -- not rrly sure how fast i want the app to run, or how many shapes we should allow, but dis works
+    app.stepsPerSecond = 8 #FIXME -- not rrly sure how fast i want the app to run, or how many shapes we should allow, but dis works
     app.setMaxShapeCount(8000)
 
 def redrawAll(app):
@@ -100,7 +100,7 @@ def load_ui_elements(app):
     app.uilayout.fix_element_layouts()
     app.uilayout.place_ui_elements()
     
-    #Instantiate non-button methods
+    #Instantiate non-button objects
     app.screen = ui.assets.AppScreen(app.config, border=(48, 48, 48)) 
     app.timeline = ui.assets.Timeline(app.config, color=(129, 134, 156), slider_color=(250, 243, 243))
     counts = app.datamanager.get_firms_per_months(1) 
